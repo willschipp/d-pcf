@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-jms="http://www.springframework.org/schema/integration/jms"
+	xmlns:int-jpa="http://www.springframework.org/schema/integration/jpa"
+	xsi:schemaLocation="http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/integration/jms http://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/integration/jpa http://www.springframework.org/schema/integration/jpa/spring-integration-jpa.xsd">
+
+	<int-jms:message-driven-channel-adapter
+		id="inbound.adapter"
+		connection-factory="connectionFactory"
+		channel="message.inbound"
+		destination="inbound.queue"/>
+
+	<int:channel id="message.inbound"/>
+	
+	<int:chain input-channel="message.inbound">
+		<int:transformer expression="new io.pivotal.poc.du.messaging.domain.RequestMessage(payload)"/>
+		<int:transformer expression="payload.setId(headers['id']) == null ? payload : null"/>
+		<int-jpa:outbound-channel-adapter 
+			entity-manager-factory="entityManagerFactory"
+			persist-mode="PERSIST">
+			<int-jpa:transactional/>
+		</int-jpa:outbound-channel-adapter>		
+	</int:chain>
+
+
+	
+</beans>

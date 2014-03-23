@@ -38,4 +38,9 @@ public class JobServiceEndpoint {
 	public List<JobInstance> jobInstances(@PathVariable("jobName") String jobName) {
 		return jobExplorer.getJobInstances(jobName, 0, Integer.MAX_VALUE);
 	}
+	
+	@RequestMapping(value="/{id}/execution",method=RequestMethod.GET)
+	public JobExecution getJobExecution(@PathVariable("id") Long executionId) {
+		return jobExplorer.getJobExecution(executionId);
+	}
 }

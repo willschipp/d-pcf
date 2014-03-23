@@ -32,6 +32,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.UrlResource;
 
+/**
+ * job configuration
+ * 
+ * has one step which, in chunks, reads lines from the file;
+ * converts them to BCBSEntity objects
+ * and then writes them (in blocks of 10) to the target database
+ * 
+ * @author wschipp
+ *
+ */
 @Configuration
 @EnableBatchProcessing
 public class AsciiJob {
@@ -52,6 +62,12 @@ public class AsciiJob {
 		return factory.get("step1").<BCBSEntity,BCBSEntity> chunk(10).reader(reader).writer(writer).build();
 	}
 	
+	/**
+	 * gets the "source" of the file as a job parameter -- initiated by Spring Integration
+	 * @param source
+	 * @return
+	 * @throws Exception
+	 */
 	@Bean
 	@StepScope
 	public FlatFileItemReader<BCBSEntity> reader(@Value("#{jobParameters['sourceFile']}") String source) throws Exception {
@@ -59,15 +75,19 @@ public class AsciiJob {
 		reader.setResource(new UrlResource(source));
 		 reader.setLineMapper(new DefaultLineMapper<BCBSEntity>() {{
 	            setLineTokenizer(new DelimitedLineTokenizer() {{
-	                setNames(new String[] { "id", "msisdn","planId","createddate","updateddate","amount" });
+	                setNames(new String[] { "id", "msisdn","planId","createddate","updateddate","amount" });//mapping to the setter names of the bean
 	            }});
 	            setFieldSetMapper(mapper());
 	        }});
 		return reader;
 	}
 	
+	/**
+	 * mapper with date/time specific converter for the YYYY-MM-DD format of the source file
+	 * @return
+	 */
 	@Bean
-	public FieldSetMapper mapper() {
+	public FieldSetMapper<BCBSEntity> mapper() {
 		BeanWrapperFieldSetMapper<BCBSEntity> mapper = new BeanWrapperFieldSetMapper<BCBSEntity>();
 		mapper.setTargetType(BCBSEntity.class);
 		Map<String,PropertyEditor> editors = new HashMap<String,PropertyEditor>();
@@ -76,12 +96,21 @@ public class AsciiJob {
 		return mapper;
 	}
 	
+	/**
+	 * date format editor
+	 * @return
+	 */
 	@Bean
 	public PropertyEditor propertyEditor() {
 		CustomDateEditor editor = new CustomDateEditor(new SimpleDateFormat("yyyy-mm-dd"), true);
 		return editor;
 	}
 	
+	/**
+	 * configuration of writer
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
 	@Bean
 	public ItemWriter<BCBSEntity> writer() {
 		RepositoryItemWriter writer = new RepositoryItemWriter();
@@ -90,6 +119,10 @@ public class AsciiJob {
 		return writer;
 	}
 	
+	/**
+	 * job registry to support the servlet component
+	 * @return
+	 */
 	@Bean
 	public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor() {
 		JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();

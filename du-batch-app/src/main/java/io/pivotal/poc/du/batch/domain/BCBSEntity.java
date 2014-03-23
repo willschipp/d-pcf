@@ -9,8 +9,15 @@ import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+/**
+ * simple entity for persisting a BCBS entity into the target database
+ * @author wschipp
+ *
+ */
 @Entity
 public class BCBSEntity implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	private Long id;

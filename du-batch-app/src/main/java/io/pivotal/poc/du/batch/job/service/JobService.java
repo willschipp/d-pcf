@@ -18,7 +18,7 @@ public class JobService {
 	
 	public void start(String payload) throws Exception {
 		//create job parameters
-		JobParameters jobParameters = new JobParametersBuilder().addString("sourceFile", payload).toJobParameters();
+		JobParameters jobParameters = new JobParametersBuilder().addString("sourceFile","file://" +  payload).toJobParameters();
 		//start the job
 		jobLauncher.run(job, jobParameters);
 		//exit (expectation is that the underlying jobLauncher is async)

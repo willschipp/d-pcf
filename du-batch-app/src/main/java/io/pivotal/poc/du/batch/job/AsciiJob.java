@@ -8,6 +8,8 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.EntityManagerFactory;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -19,7 +21,7 @@ import org.springframework.batch.core.configuration.support.JobRegistryBeanPostP
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.data.RepositoryItemWriter;
+import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
@@ -45,12 +47,12 @@ import org.springframework.core.io.UrlResource;
 @Configuration
 @EnableBatchProcessing
 public class AsciiJob {
-
-	@Autowired
-	private BCBSEntityRepository bcbsEntityRepository;
 	
 	@Autowired
 	private JobRegistry jobRegistry;
+	
+	@Autowired
+	private EntityManagerFactory entityManagerFactory;
 	
 	@Bean
 	public Job insertJob(JobBuilderFactory factory,Step step1) {
@@ -113,9 +115,8 @@ public class AsciiJob {
 	@SuppressWarnings("unchecked")
 	@Bean
 	public ItemWriter<BCBSEntity> writer() {
-		RepositoryItemWriter writer = new RepositoryItemWriter();
-		writer.setRepository(bcbsEntityRepository);
-		writer.setMethodName("save");
+		JpaItemWriter<BCBSEntity> writer = new JpaItemWriter<BCBSEntity>();
+		writer.setEntityManagerFactory(entityManagerFactory);
 		return writer;
 	}
 	

@@ -1,5 +1,8 @@
 package io.pivotal.poc.du.batch.web;
 
+import io.pivotal.poc.du.batch.domain.JobExecutionWrapper;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -40,7 +43,23 @@ public class JobServiceEndpoint {
 	}
 	
 	@RequestMapping(value="/{id}/execution",method=RequestMethod.GET)
-	public JobExecution getJobExecution(@PathVariable("id") Long executionId) {
-		return jobExplorer.getJobExecution(executionId);
+	public JobExecutionWrapper getJobExecution(@PathVariable("id") Long executionId) {
+		return new JobExecutionWrapper(jobExplorer.getJobExecution(executionId));
+	}
+	
+	@RequestMapping(value="/{jobName}/executions",method=RequestMethod.GET)
+	public List<JobExecutionWrapper> jobExecutions(@PathVariable("jobName") String jobName) {
+		List<JobExecutionWrapper> jobExecutions = new ArrayList<JobExecutionWrapper>();
+		//get the job instances
+		List<JobInstance> jobInstances = jobExplorer.getJobInstances(jobName, 0, Integer.MAX_VALUE);
+		for (JobInstance instance : jobInstances) {
+			Collection<JobExecution> executions = jobExplorer.getJobExecutions(instance);
+			for (JobExecution execution : executions) {
+				jobExecutions.add(new JobExecutionWrapper(execution));
+			}//end for
+		}//end for
+		System.out.println("about to return...");
+		//return
+		return jobExecutions;
 	}
 }

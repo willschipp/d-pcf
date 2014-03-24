@@ -2,7 +2,7 @@ package io.pivotal.poc.du.loyalty.s4.domain;
 
 import javax.sql.DataSource;
 
-import org.h2.jdbcx.JdbcConnectionPool;
+import org.postgresql.ds.PGPoolingDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -13,7 +13,15 @@ public class DefaultDataSourceConfiguration {
 
 	@Bean
 	public DataSource dataSource() {
-		return JdbcConnectionPool.create("jdbc:h2:mem:a","sa","");
+		PGPoolingDataSource source = new PGPoolingDataSource();
+		//set
+		source.setServerName("localhost");//TODO remove hard coding
+		source.setDatabaseName("wschipp");
+		source.setUser("wschipp");
+		source.setPassword("");
+		source.setMaxConnections(10);
+		//return
+		return source;
 	}	
 	
 }

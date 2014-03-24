@@ -9,7 +9,8 @@ public class ServletInitializer extends
 
 	@Override
 	protected Class<?>[] getRootConfigClasses() {
-		return new Class<?>[]{JpaConfiguration.class,RestConfiguration.class};
+//		return new Class<?>[]{JpaConfiguration.class,RestConfiguration.class};
+		return new Class<?>[]{JpaConfiguration.class};
 	}
 
 	@Override
